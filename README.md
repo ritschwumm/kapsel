@@ -1,7 +1,7 @@
 
 # about
 
-kapsel is a bare-bones packaging tool for java application which allows distributing java applications in a single jar file in an extremely simple way. in essence, kapsel is a stripped-to-the-bones reimplementation of [capsule](https://github.com/puniverse/capsule)'s core functionality, without any of the bells and whistles.
+kapsel is a bare-bones packaging tool for java applications which allows distributing java applications in a single jar file in an extremely simple way. in essence, kapsel is a stripped-to-the-bones reimplementation of [capsule](https://github.com/puniverse/capsule)'s core functionality, without any of the bells and whistles.
 
 # how it works
 
