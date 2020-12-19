@@ -114,7 +114,7 @@ public final class Kapsel {
 
 	private static String oneArg(Attributes attributes, String key) {
 		final String value	= attributes.getValue(key);
-		if (value == null)	throw new RuntimeException("attribute " + key + " not found in the mainfest");
+		if (value == null)	throw new RuntimeException("attribute " + key + " not found in the manifest");
 		return value;
 	}
 
