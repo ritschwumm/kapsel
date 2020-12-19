@@ -40,9 +40,7 @@ public final class Kapsel {
 				debug("classPath",		classPath);
 
 				final Path cacheBase	=
-					envVar("KAPSEL_CACHE").map(fileSystem::getPath).orElse(
-						fileSystem.getPath(System.getProperty("user.home"), ".kapsel")
-					);
+					envVar("KAPSEL_CACHE").map(fileSystem::getPath).orElse(standardCacheBase(fileSystem));
 				debug("cacheBase",	cacheBase);
 
 				final Path cache	= cacheBase.resolve(applicationId);
@@ -83,12 +81,34 @@ public final class Kapsel {
 					.start();
 
 				final int rc	= process.waitFor();
+				debug("rc", rc);
 				System.exit(rc);
 			}
 		}
 		catch (Exception e) {
 			e.printStackTrace();
 			System.exit(128);
+		}
+	}
+
+	private static Path standardCacheBase(FileSystem fileSystem) {
+		final String	osName		= System.getProperty("os.name").toLowerCase(Locale.ROOT);
+		final Path		userHome	= fileSystem.getPath(System.getProperty("user.home"));
+		if (osName.contains("linux") || osName.contains("bsd")) {
+			return envVar("XDG_CACHE_HOME").map(fileSystem::getPath).orElse(userHome.resolve(".cache")).resolve("kapsel");
+		}
+		else if (osName.contains("mac")) {
+			return userHome.resolve("Library").resolve("Caches").resolve("kapsel");
+		}
+		/*
+		else if (osName.contains("windows")) {
+			// TODO support windows
+			final Path localApplicationData	= fileSystem.getPath("???");
+			return localApplicationData.resolve("kapsel").resolve("cache");
+		}
+		*/
+		else {
+			return userHome.resolve(".kapsel");
 		}
 	}
 
@@ -102,15 +122,15 @@ public final class Kapsel {
 		final String value	= attributes.getValue(key);
 		if (value == null)	return Collections.emptyList();
 		return Arrays.stream(value.split("\\s"))
-			.map((it) -> it.trim())
+			.map(it -> it.trim())
 			.filter(it -> !it.isEmpty())
 			.collect(Collectors.toList());
 	}
 
 	private static void debug(Object... args) {
 		envVar("KAPSEL_DEBUG")
-		.filter((it) -> it.equals("true"))
-		.ifPresent((it) ->
+		.filter(it -> it.equals("true"))
+		.ifPresent(it ->
 			System.err.println(Arrays.toString(args))
 			//System.out.println(String.join(" ", Arrays.asList(args)));
 		);
