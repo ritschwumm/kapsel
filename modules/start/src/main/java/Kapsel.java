@@ -5,6 +5,12 @@ import java.util.stream.*;
 import java.util.jar.*;
 
 public final class Kapsel {
+	private static final int OS_LINUX	= 1;
+	private static final int OS_BSD		= 2;
+	private static final int OS_MACOSX	= 3;
+	private static final int OS_WINDOWS	= 4;
+	private static final int OS_UNKNOWN	= 0;
+
 	public static void main(String[] args) {
 		try {
 			final FileSystem fileSystem	= FileSystems.getDefault();
@@ -19,12 +25,22 @@ public final class Kapsel {
 			debug("jvmArgs",	jvmArgs);
 			debug("plainArgs",	plainArgs);
 
-			final Path javaBin	=
-				envVar("KAPSEL_JAVA").map(fileSystem::getPath).orElseGet(() -> {
-					final boolean	windowsOs	= System.getProperty("os.name").toLowerCase().startsWith("windows");
-					final String	javaName	= windowsOs ? "javaw" : "java";
-					return fileSystem.getPath(System.getProperty("java.home"), "bin", javaName);
-				});
+			final String	osName	= System.getProperty("os.name").toLowerCase(Locale.ROOT);
+			final int 		os		= osName.contains("linux")		? OS_LINUX
+									: osName.contains("bsd")		? OS_BSD
+									: osName.contains("mac")		? OS_MACOSX
+									: osName.contains("windows")	? OS_WINDOWS
+									: OS_UNKNOWN;
+			debug("os",	os);
+
+			final Path	javaBin	=
+				envVar("KAPSEL_JAVA").map(fileSystem::getPath).orElseGet(() ->
+					fileSystem.getPath(
+						System.getProperty("java.home"),
+						"bin",
+						os == OS_WINDOWS ? "javaw" : "java"
+					)
+				);
 			debug("javaBin",	javaBin);
 
 			try (InputStream manifestStream = resource("META-INF/MANIFEST.MF")) {
@@ -40,7 +56,7 @@ public final class Kapsel {
 				debug("classPath",		classPath);
 
 				final Path cacheBase	=
-					envVar("KAPSEL_CACHE").map(fileSystem::getPath).orElse(standardCacheBase(fileSystem));
+					envVar("KAPSEL_CACHE").map(fileSystem::getPath).orElseGet(() -> standardCacheBase(fileSystem, os));
 				debug("cacheBase",	cacheBase);
 
 				final Path cache	= cacheBase.resolve(applicationId);
@@ -91,24 +107,18 @@ public final class Kapsel {
 		}
 	}
 
-	private static Path standardCacheBase(FileSystem fileSystem) {
-		final String	osName		= System.getProperty("os.name").toLowerCase(Locale.ROOT);
-		final Path		userHome	= fileSystem.getPath(System.getProperty("user.home"));
-		if (osName.contains("linux") || osName.contains("bsd")) {
-			return envVar("XDG_CACHE_HOME").map(fileSystem::getPath).orElse(userHome.resolve(".cache")).resolve("kapsel");
-		}
-		else if (osName.contains("mac")) {
-			return userHome.resolve("Library").resolve("Caches").resolve("kapsel");
-		}
-		/*
-		else if (osName.contains("windows")) {
-			// TODO support windows
-			final Path localApplicationData	= fileSystem.getPath("???");
-			return localApplicationData.resolve("kapsel").resolve("cache");
-		}
-		*/
-		else {
-			return userHome.resolve(".kapsel");
+	private static Path standardCacheBase(FileSystem fileSystem, int os) {
+		final Path	userHome	= fileSystem.getPath(System.getProperty("user.home"));
+		switch (os) {
+			case OS_LINUX:
+			case OS_BSD:
+				return envVar("XDG_CACHE_HOME").map(fileSystem::getPath).orElse(userHome.resolve(".cache")).resolve("kapsel");
+			case OS_MACOSX:
+				return userHome.resolve("Library").resolve("Caches").resolve("kapsel");
+			case OS_WINDOWS:
+				or(envVar("LOCALAPPDATA"), envVar("APPDATA")).map(fileSystem::getPath).orElse(userHome).resolve("kapsel").resolve("cache");
+			default:
+				return userHome.resolve(".kapsel");
 		}
 	}
 
@@ -142,5 +152,10 @@ public final class Kapsel {
 
 	private static Optional<String> envVar(String name) {
 		return Optional.ofNullable(System.getenv(name));
+	}
+
+	// NOTE Optional.or exists from java 9 on
+	private static <T> Optional<T> or(Optional<T> a, Optional<T> b) {
+		return a.isPresent() ? a : b;
 	}
 }

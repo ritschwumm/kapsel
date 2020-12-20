@@ -2,6 +2,11 @@ target/
 project/boot/
 /.bsp/
 
+metals.sbt
+.metals/
+.bloop/
+/.vscode/
+
 private.sbt
 /doc/
 /versatz/
