@@ -14,7 +14,7 @@ the startup of a kapsel bundle happens in two stages:
 * a first jvm instance (called the kapsel jvm in the following) runs the starter class
 * the starter class then starts a second jvm (called the application jvm) which runs the actual application
 
-when a kapsel bundle is run with `java -jar bundle.jar`, the kapsel jvm will execute the main class `Kapsel.class`. the kapsel main class will then read `META-INF/MAINFEST.MF`. for each `Kapsel-Class-Path` entry in the kapsel manifest, a copy of the jar file of the same name will be copied from inside the bundle to the kapsel cache directory under  `${user.home}/.kapsel` named after `Kapsel-Applicaton-Id`. finally, kapsel will start a new application jvm from `${java.home}/bin/java` with the jar files on the classpath and additional parameters passed in from `Kapsel-Jvm-Options` and the main class taken from `Kapsel-Main-Class`.
+when a kapsel bundle is run with `java -jar bundle.jar`, the kapsel jvm will execute the main class `Kapsel.class`. the kapsel main class will then read `META-INF/MAINFEST.MF`. for each `Kapsel-Class-Path` entry in the kapsel manifest, a copy of the jar file of the same name will be copied from inside the bundle to the kapsel cache directory under  `${user.home}/.cache/kapsel` (on linux and bsd, windows and max os x use different locations) named after `Kapsel-Applicaton-Id`. finally, kapsel will start a new application jvm from `${java.home}/bin/java` with the jar files on the classpath and additional parameters passed in from `Kapsel-Jvm-Options` and the main class taken from `Kapsel-Main-Class`.
 
 # example bundle
 
@@ -62,7 +62,7 @@ the command command line used by `Kapsel.class` to start the application jvm now
 /usr/bin/java
   -Xmx128m \
   -Dtest.config=foobar \
-  -cp /home/myself/.kapsel/application.jar:/home/myself/.kapsel/library.jar \
+  -cp /home/myself/.cache/kapsel/application.jar:/home/myself/.cache/kapsel/library.jar \
   application.Main hello world
 ```
 
