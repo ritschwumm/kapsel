@@ -96,6 +96,8 @@ public final class Kapsel {
 					.redirectError	(ProcessBuilder.Redirect.INHERIT)
 					.start();
 
+				Runtime.getRuntime().addShutdownHook(new Thread(() -> process.destroy()));
+
 				final int rc	= process.waitFor();
 				debug("rc", rc);
 				System.exit(rc);

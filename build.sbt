@@ -2,7 +2,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 inThisBuild(Seq(
 	organization	:= "de.djini",
-	version			:= "0.2.0",
+	version			:= "0.3.0",
 
 	scalaVersion	:= "2.13.4",
 	scalacOptions	++= Seq(
