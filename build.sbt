@@ -1,18 +1,22 @@
+ThisBuild / useCoursier := false
+
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
 inThisBuild(Seq(
 	organization	:= "de.djini",
-	version			:= "0.3.0",
+	version			:= "0.4.0",
 
-	scalaVersion	:= "2.13.4",
+	scalaVersion	:= "3.1.0",
 	scalacOptions	++= Seq(
 		"-feature",
 		"-deprecation",
 		"-unchecked",
-		"-Werror",
-		"-Xlint",
+		"-Wunused:all",
+		"-Xfatal-warnings",
+		"-Ykind-projector:underscores",
 	),
 
+	versionScheme	:= Some("early-semver"),
 	conflictManager	:= ConflictManager.strict
 ))
 
