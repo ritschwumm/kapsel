@@ -5,7 +5,12 @@ project/boot/
 metals.sbt
 .metals/
 .bloop/
+
 /.vscode/
+
+/override.sbt
+
+###
 
 private.sbt
 /doc/
